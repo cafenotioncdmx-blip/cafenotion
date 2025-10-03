@@ -63,7 +63,7 @@ export default function BarPage() {
           setRetryCount((prev) => prev + 1);
         }
       }
-    } catch (err) {
+    } catch {
       const errorMessage = "Network error - check your connection";
       setError(errorMessage);
       if (isRetry) {

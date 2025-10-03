@@ -32,7 +32,7 @@ export async function PATCH(
     }
 
     // Prepare update data
-    const updateData: Record<string, any> = { status };
+    const updateData: Record<string, string | Date> = { status };
 
     // Set timestamps based on status
     if (status === "ready") {
