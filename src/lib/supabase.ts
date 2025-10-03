@@ -21,8 +21,13 @@ export function getSupabaseClient() {
   return supabaseClient;
 }
 
-// Export the client directly for simpler usage
-export const supabase = getSupabaseClient();
+// Export a proxy that only initializes when actually used
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    return client[prop as keyof ReturnType<typeof createClient>];
+  }
+});
 
 export type Order = {
   id: string;
