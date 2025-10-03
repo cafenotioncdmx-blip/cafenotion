@@ -42,6 +42,7 @@ export async function PATCH(
       updateData.delivered_at = new Date().toISOString();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (supabase as any)
       .from("orders")
       .update(updateData)
