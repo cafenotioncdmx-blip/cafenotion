@@ -1,9 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
-let supabase: ReturnType<typeof createClient> | null = null;
+let supabaseClient: ReturnType<typeof createClient> | null = null;
 
 export function getSupabaseClient() {
-  if (!supabase) {
+  if (!supabaseClient) {
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
@@ -11,22 +11,18 @@ export function getSupabaseClient() {
       throw new Error("Missing Supabase environment variables");
     }
 
-    supabase = createClient(supabaseUrl, supabaseServiceKey, {
+    supabaseClient = createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
       },
     });
   }
-  return supabase;
+  return supabaseClient;
 }
 
-// For backward compatibility, export a getter
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
-  get(target, prop) {
-    return getSupabaseClient()[prop as keyof ReturnType<typeof createClient>];
-  }
-});
+// Export the client directly for simpler usage
+export const supabase = getSupabaseClient();
 
 export type Order = {
   id: string;

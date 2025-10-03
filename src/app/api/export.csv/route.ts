@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
+import { supabase, Order } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function GET() {
@@ -46,7 +46,7 @@ export async function GET() {
 
     const csvRows = [
       headers.join(","),
-      ...(orders || []).map((order) =>
+      ...(orders || []).map((order: Order & { company?: string; role?: string; company_size?: string; milk_type?: string; deleted_at?: string }) =>
         [
           order.id,
           order.created_at,

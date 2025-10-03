@@ -32,7 +32,8 @@ export async function PATCH(
     }
 
     // Prepare update data
-    const updateData: Record<string, string | Date> = { status };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updateData: any = { status };
 
     // Set timestamps based on status
     if (status === "ready") {
