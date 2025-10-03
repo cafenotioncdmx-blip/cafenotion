@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
     const pickupCode = generatePickupCode();
 
     // Insert order into database
-    const { data, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
       .from("orders")
       .insert({
         first_name,
@@ -111,7 +112,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
 
-    let query = supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query = (supabase as any)
       .from("orders")
       .select("*")
       .is("deleted_at", null) // Exclude soft-deleted records
@@ -164,7 +166,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Soft delete by setting deleted_at timestamp
-    const { error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
       .from("orders")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", orderId)

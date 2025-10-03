@@ -11,7 +11,8 @@ export async function GET() {
     }
 
     // Fetch all orders (including soft-deleted ones for CSV export)
-    const { data: orders, error } = await supabase
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: orders, error } = await (supabase as any)
       .from("orders")
       .select("*")
       .order("created_at", { ascending: true });
@@ -46,25 +47,34 @@ export async function GET() {
 
     const csvRows = [
       headers.join(","),
-      ...(orders || []).map((order: Order & { company?: string; role?: string; company_size?: string; milk_type?: string; deleted_at?: string }) =>
-        [
-          order.id,
-          order.created_at,
-          `"${order.first_name}"`,
-          `"${order.last_name}"`,
-          `"${order.company}"`,
-          `"${order.role}"`,
-          `"${order.company_size}"`,
-          `"${order.email}"`,
-          order.phone,
-          `"${order.drink}"`,
-          `"${order.milk_type}"`,
-          order.status,
-          order.pickup_code,
-          order.ready_at || "",
-          order.delivered_at || "",
-          order.deleted_at || "",
-        ].join(",")
+      ...(orders || []).map(
+        (
+          order: Order & {
+            company?: string;
+            role?: string;
+            company_size?: string;
+            milk_type?: string;
+            deleted_at?: string;
+          }
+        ) =>
+          [
+            order.id,
+            order.created_at,
+            `"${order.first_name}"`,
+            `"${order.last_name}"`,
+            `"${order.company}"`,
+            `"${order.role}"`,
+            `"${order.company_size}"`,
+            `"${order.email}"`,
+            order.phone,
+            `"${order.drink}"`,
+            `"${order.milk_type}"`,
+            order.status,
+            order.pickup_code,
+            order.ready_at || "",
+            order.delivered_at || "",
+            order.deleted_at || "",
+          ].join(",")
       ),
     ];
 
