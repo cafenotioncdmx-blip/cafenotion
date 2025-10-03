@@ -155,7 +155,7 @@ create table orders (
 When an order is marked as "Ready", baristas can send a pre-formatted WhatsApp message:
 
 ```
-Hola {first_name} {last_name}! Tu café ({drink}) está listo. Código: {pickup_code}. Pásalo a recoger en la barra ☕️
+Hola {first_name} {last_name}! Tu café {drink} está listo. Código: {pickup_code}. Pásalo a recoger en la barra ☕️
 ```
 
 ## Deployment

@@ -78,7 +78,7 @@ export default function HomePage() {
                 <strong>Edecanes:</strong> Registrar asistentes
               </p>
               <p>
-                <strong>Baristas:</strong> Gestionar cola de café
+                <strong>Baristas:</strong> Gestionar pedidos de café
               </p>
               <p>
                 <strong>Admin:</strong> Ver todas las órdenes y exportar datos

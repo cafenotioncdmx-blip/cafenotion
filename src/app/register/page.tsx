@@ -174,7 +174,7 @@ export default function RegisterPage() {
               </h2>
               <p className="text-gray-600">
                 El {successData.order.drink} de {successData.order.first_name}{" "}
-                {successData.order.last_name} ya está en la cola.
+                {successData.order.last_name} ya está preparándose.
               </p>
             </div>
           </div>
@@ -412,19 +412,17 @@ export default function RegisterPage() {
                 onChange={handleInputChange}
               >
                 <option value="">Selecciona una bebida</option>
-                <option value="1 – Espresso">1 – Espresso</option>
-                <option value="2 – Americano">2 – Americano</option>
-                <option value="3 – Flat White">3 – Flat White</option>
-                <option value="4 – Latte">4 – Latte</option>
-                <option value="5 – Iced Americano">5 – Iced Americano</option>
-                <option value="6 – Iced Latte">6 – Iced Latte</option>
-                <option value="7 – Iced Matcha Latte">
-                  7 – Iced Matcha Latte
-                </option>
-                <option value="8 – Iced Horchata Matcha">
+                <option value="Espresso">1 – Espresso</option>
+                <option value="Americano">2 – Americano</option>
+                <option value="Flat White">3 – Flat White</option>
+                <option value="Latte">4 – Latte</option>
+                <option value="Iced Americano">5 – Iced Americano</option>
+                <option value="Iced Latte">6 – Iced Latte</option>
+                <option value="Iced Matcha Latte">7 – Iced Matcha Latte</option>
+                <option value="Iced Horchata Matcha">
                   8 – Iced Horchata Matcha
                 </option>
-                <option value="9 – Iced Horchata Coffee">
+                <option value="Iced Horchata Coffee">
                   9 – Iced Horchata Coffee
                 </option>
               </select>

@@ -30,7 +30,7 @@ const statusColors = {
 };
 
 const statusLabels = {
-  queued: "En Cola",
+  queued: "Preparando",
   in_progress: "En Proceso",
   ready: "Listo",
   delivered: "Entregado",
@@ -109,7 +109,7 @@ export default function BarPage() {
   };
 
   const generateWhatsAppLink = (order: Order) => {
-    const message = `Hola ${order.first_name} ${order.last_name}! Tu café (${order.drink}) está listo. Código: ${order.pickup_code}. Pásalo a recoger en la barra ☕️`;
+    const message = `Hola ${order.first_name} ${order.last_name}! Tu café ${order.drink} - ${order.milk_type} está listo. Código: ${order.pickup_code}. Pásalo a recoger en la barra ☕️`;
     return `https://wa.me/${order.phone}?text=${encodeURIComponent(message)}`;
   };
 
