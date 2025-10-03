@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface Order {
   id: string;
@@ -179,7 +180,27 @@ export default function BarPage() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Cola de Café</h1>
+            <div className="flex justify-center h-24 items-center md:mb-8 mb-0">
+              <div className="md:w-28 w-20">
+                <Image
+                  src="/images/icon.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
+              <div className="md:w-48 w-32">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
+            </div>
+
             <button
               onClick={handleLogout}
               className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
@@ -204,7 +225,8 @@ export default function BarPage() {
                 )}
                 {lastFetchTime && (
                   <p className="text-xs text-red-500 mt-1">
-                    Última actualización exitosa: {lastFetchTime.toLocaleTimeString()}
+                    Última actualización exitosa:{" "}
+                    {lastFetchTime.toLocaleTimeString()}
                   </p>
                 )}
               </div>
