@@ -232,6 +232,26 @@ export default function RegisterPage() {
           />
         </div>
         <div className="text-center">
+          <div className="flex justify-center h-24 items-center md:mb-8 mb-0">
+            <div className="md:w-28 w-20">
+              <Image
+                src="/images/icon.svg"
+                alt="Aplicación de Evento de Café"
+                width={100}
+                height={100}
+                className="w-full object-cover"
+              />
+            </div>
+            <div className="md:w-48 w-32">
+              <Image
+                src="/images/logo.svg"
+                alt="Aplicación de Evento de Café"
+                width={100}
+                height={100}
+                className="w-full object-cover"
+              />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Registrar Asistente
           </h1>
