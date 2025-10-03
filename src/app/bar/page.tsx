@@ -29,10 +29,10 @@ const statusColors = {
 };
 
 const statusLabels = {
-  queued: "Queued",
-  in_progress: "In Progress",
-  ready: "Ready",
-  delivered: "Delivered",
+  queued: "En Cola",
+  in_progress: "En Proceso",
+  ready: "Listo",
+  delivered: "Entregado",
 };
 
 export default function BarPage() {
@@ -64,7 +64,7 @@ export default function BarPage() {
         }
       }
     } catch {
-      const errorMessage = "Network error - check your connection";
+      const errorMessage = "Error de red - verifica tu conexión";
       setError(errorMessage);
       if (isRetry) {
         setRetryCount((prev) => prev + 1);
@@ -98,10 +98,10 @@ export default function BarPage() {
         await fetchOrders(); // Refresh the list
       } else {
         const data = await response.json();
-        setError(data.error || "Failed to update order");
+        setError(data.error || "Error al actualizar la orden");
       }
     } catch {
-      setError("Something went wrong while updating order");
+      setError("Algo salió mal al actualizar la orden");
     } finally {
       setUpdating(null);
     }
@@ -135,11 +135,11 @@ export default function BarPage() {
   const getStatusAction = (currentStatus: string) => {
     switch (currentStatus) {
       case "queued":
-        return "Start";
+        return "Iniciar";
       case "in_progress":
-        return "Ready";
+        return "Listo";
       case "ready":
-        return "Delivered";
+        return "Entregado";
       default:
         return null;
     }
@@ -168,7 +168,7 @@ export default function BarPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#0075de] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading orders...</p>
+          <p className="mt-4 text-gray-600">Cargando órdenes...</p>
         </div>
       </div>
     );
@@ -179,16 +179,16 @@ export default function BarPage() {
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <div className="mb-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Coffee Queue</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Cola de Café</h1>
             <button
               onClick={handleLogout}
               className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
             >
-              Logout
+              Cerrar Sesión
             </button>
           </div>
           <p className="text-gray-600 mt-2">
-            Manage coffee orders and send WhatsApp notifications
+            Gestiona las órdenes de café y envía notificaciones de WhatsApp
           </p>
         </div>
 
@@ -199,12 +199,12 @@ export default function BarPage() {
                 <p className="font-medium">{error}</p>
                 {retryCount > 0 && (
                   <p className="text-sm text-red-600 mt-1">
-                    Retry attempt {retryCount}
+                    Intento de reintento {retryCount}
                   </p>
                 )}
                 {lastFetchTime && (
                   <p className="text-xs text-red-500 mt-1">
-                    Last successful fetch: {lastFetchTime.toLocaleTimeString()}
+                    Última actualización exitosa: {lastFetchTime.toLocaleTimeString()}
                   </p>
                 )}
               </div>
@@ -213,7 +213,7 @@ export default function BarPage() {
                 disabled={loading}
                 className="ml-4 bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
               >
-                {loading ? "Retrying..." : "Retry"}
+                {loading ? "Reintentando..." : "Reintentar"}
               </button>
             </div>
           </div>
@@ -233,7 +233,7 @@ export default function BarPage() {
                   : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
               }`}
             >
-              {status === "all" ? "All" : statusLabels[status]}
+              {status === "all" ? "Todos" : statusLabels[status]}
               {status !== "all" &&
                 ` (${orders.filter((o) => o.status === status).length})`}
             </button>
@@ -242,7 +242,7 @@ export default function BarPage() {
             onClick={() => fetchOrders()}
             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            Refresh
+            Actualizar
           </button>
         </div>
 
@@ -250,7 +250,7 @@ export default function BarPage() {
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           {filteredOrders.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No orders found</p>
+              <p className="text-gray-500">No se encontraron órdenes</p>
             </div>
           ) : (
             <ul className="divide-y divide-gray-200">
@@ -308,7 +308,7 @@ export default function BarPage() {
                           className="bg-[#0075de] text-white px-3 py-1 rounded text-sm hover:bg-[#005bb7] focus:outline-none focus:ring-2 focus:ring-[#0075de] disabled:opacity-50"
                         >
                           {updating === order.id
-                            ? "Updating..."
+                            ? "Actualizando..."
                             : getStatusAction(order.status)}
                         </button>
                       )}
