@@ -164,7 +164,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Soft delete by setting deleted_at timestamp
-    const { error } = await getSupabaseClient()
+    const { error } = await supabase
       .from("orders")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", orderId)

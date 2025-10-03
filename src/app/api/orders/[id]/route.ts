@@ -42,7 +42,7 @@ export async function PATCH(
       updateData.delivered_at = new Date().toISOString();
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("orders")
       .update(updateData)
       .eq("id", id)
