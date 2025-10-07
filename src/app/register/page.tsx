@@ -232,29 +232,47 @@ export default function RegisterPage() {
           />
         </div>
         <div className="text-center">
-          <div className="flex justify-center h-24 items-center md:mb-8 mb-0">
-            <div className="md:w-28 w-20">
-              <Image
-                src="/images/icon.svg"
-                alt="Aplicación de Evento de Café"
-                width={100}
-                height={100}
-                className="w-full object-cover"
-              />
+          <div className="flex justify-between w-full">
+            <div className="flex h-24 items-center md:mb-8 mb-0">
+              <div className="md:w-28 w-20">
+                <Image
+                  src="/images/icon.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
+              <div className="md:w-48 w-32">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
             </div>
-            <div className="md:w-48 w-32">
-              <Image
-                src="/images/logo.svg"
-                alt="Aplicación de Evento de Café"
-                width={100}
-                height={100}
-                className="w-full object-cover"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className=" bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+                  <path d="M15.99 7.823a.75.75 0 0 1 1.061.021l3.49 3.637a.75.75 0 0 1 0 1.038l-3.49 3.637a.75.75 0 0 1-1.082-1.039l2.271-2.367h-6.967a.75.75 0 0 1 0-1.5h6.968l-2.272-2.367a.75.75 0 0 1 .022-1.06" />
+                  <path d="M3.25 4A.75.75 0 0 1 4 3.25h9.455a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0V4.75H4.75v14.5h7.954V17a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75H4a.75.75 0 0 1-.75-.75z" />
+                </g>
+              </svg>
+              Cerrar sesión
+            </button>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Registrar Asistente
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Regístrate</h1>
           <p className="text-gray-600 mb-8">Crear una nueva orden de café</p>
         </div>
 
@@ -474,13 +492,6 @@ export default function RegisterPage() {
                 className="w-full text-white py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 bg-[#0075de] hover:bg-[#005bb7] disabled:hover:bg-[#0075de]"
               >
                 {loading ? "Creando orden..." : "Crear orden"}
-              </button>
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-              >
-                Cerrar sesión
               </button>
             </div>
           </form>

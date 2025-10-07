@@ -156,7 +156,7 @@ export default function BarPage() {
 
   const filteredOrders =
     filter === "all"
-      ? orders
+      ? orders.filter((order) => order.status !== "delivered")
       : orders.filter((order) => order.status === filter);
 
   const handleLogout = async () => {
@@ -256,8 +256,9 @@ export default function BarPage() {
               }`}
             >
               {status === "all" ? "Todos" : statusLabels[status]}
-              {status !== "all" &&
-                ` (${orders.filter((o) => o.status === status).length})`}
+              {status === "all"
+                ? ` (${orders.filter((o) => o.status !== "delivered").length})`
+                : ` (${orders.filter((o) => o.status === status).length})`}
             </button>
           ))}
           <button

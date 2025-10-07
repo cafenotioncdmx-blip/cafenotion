@@ -95,7 +95,7 @@ function LoginForm() {
             className="w-full object-cover md:hidden"
           />
           <Image
-            src="/images/peek-3-desktop.svg"
+            src="/images/peek-3.svg"
             alt="Aplicación de Evento de Café"
             width={100}
             height={100}
