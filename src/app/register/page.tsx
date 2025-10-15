@@ -60,7 +60,7 @@ export default function RegisterPage() {
 
   // Fetch coffee options on component mount and set up auto-refresh
   useEffect(() => {
-    const fetchCoffeeOptions = async (isRefresh = false) => {
+    const fetchCoffeeOptions = async () => {
       try {
         const response = await fetch("/api/coffee-options?enabled_only=true", {
           cache: "no-store", // Prevent caching to get fresh data
@@ -70,7 +70,7 @@ export default function RegisterPage() {
           const newOptions = data.coffee_options;
 
           // Check for changes if this is a refresh (not initial load)
-          if (isRefresh && coffeeOptions.length > 0) {
+          if (false && coffeeOptions.length > 0) {
             const currentEnabledNames = coffeeOptions.map(
               (opt: CoffeeOption) => opt.name
             );
@@ -126,15 +126,9 @@ export default function RegisterPage() {
       }
     };
 
-    // Initial fetch
-    fetchCoffeeOptions(false);
-
-    // Set up auto-refresh every 5 seconds
-    const interval = setInterval(() => fetchCoffeeOptions(true), 5000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }, [coffeeOptions]); // Add coffeeOptions as dependency to detect changes
+    // Initial fetch only
+    fetchCoffeeOptions();
+  }, []); // Empty dependency array - only run on mount
 
   // Auto-dismiss notifications after 4 seconds
   useEffect(() => {
@@ -190,13 +184,41 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    // Validate that the selected drink is still available
+    const selectedDrink = coffeeOptions.find(
+      (option) => option.name === formData.drink
+    );
+    if (!selectedDrink || !selectedDrink.enabled) {
+      setError(
+        "La opción de café seleccionada ya no está disponible. Por favor, selecciona otra opción."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Validate and correct milk type based on drink requirements
+    let correctedMilkType = formData.milk_type;
+    if (!selectedDrink.uses_milk) {
+      // If drink doesn't use milk, always set to "Sin leche"
+      correctedMilkType = "Sin leche";
+    } else if (selectedDrink.uses_milk && !formData.milk_type) {
+      // If drink uses milk but no milk selected, set default
+      correctedMilkType = "Sin leche";
+    }
+
+    // Update form data with corrected milk type
+    const correctedFormData = {
+      ...formData,
+      milk_type: correctedMilkType,
+    };
+
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(correctedFormData),
       });
 
       if (response.ok) {
@@ -263,25 +285,44 @@ export default function RegisterPage() {
               className="w-full object-cover"
             />
           </div>
-          <div className="flex justify-center h-24 items-center mb-8">
-            <div className="w-28">
-              <Image
-                src="/images/icon.svg"
-                alt="Aplicación de Evento de Café"
-                width={100}
-                height={100}
-                className="w-full object-cover"
-              />
+          <div className="flex justify-between w-full items-center mb-8">
+            <div className="flex h-24 items-center">
+              <div className="w-28">
+                <Image
+                  src="/images/icon.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
+              <div className="w-48">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
+              </div>
             </div>
-            <div className="w-48">
-              <Image
-                src="/images/logo.svg"
-                alt="Aplicación de Evento de Café"
-                width={100}
-                height={100}
-                className="w-full object-cover"
-              />
-            </div>
+            <button
+              type="button"
+              onClick={() => setShowMenu(!showMenu)}
+              className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
+              </svg>
+            </button>
           </div>
           <div className="mb-6 flex justify-center w-full mx-auto">
             <div className="flex items-center justify-center h-16! w-16! rounded-full bg-green-100">
@@ -329,14 +370,69 @@ export default function RegisterPage() {
             >
               Crear Otra Orden
             </button>
-            <button
-              onClick={handleLogout}
-              className="w-full bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              Cerrar sesión
-            </button>
           </div>
         </div>
+
+        {/* Offcanvas Menu */}
+        {showMenu && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setShowMenu(false)}
+            />
+
+            {/* Offcanvas */}
+            <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
+                  <button
+                    onClick={() => setShowMenu(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Menu Items */}
+                <div className="flex-1 p-6">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <g fillRule="evenodd" clipRule="evenodd">
+                        <path d="M15.99 7.823a.75.75 0 0 1 1.061.021l3.49 3.637a.75.75 0 0 1 0 1.038l-3.49 3.637a.75.75 0 0 1-1.082-1.039l2.271-2.367h-6.967a.75.75 0 0 1 0-1.5h6.968l-2.272-2.367a.75.75 0 0 1 .022-1.06" />
+                        <path d="M3.25 4A.75.75 0 0 1 4 3.25h9.455a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0V4.75H4.75v14.5h7.954V17a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75H4a.75.75 0 0 1-.75-.75z" />
+                      </g>
+                    </svg>
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -584,7 +680,7 @@ export default function RegisterPage() {
                 <select
                   id="milk_type"
                   name="milk_type"
-                  required
+                  required={currentDrinkUsesMilk}
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
                   value={formData.milk_type}
                   onChange={handleInputChange}

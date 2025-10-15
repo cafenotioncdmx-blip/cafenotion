@@ -39,6 +39,15 @@ export default function CoffeeManagementPage() {
 
   const toggleCoffeeOption = async (id: string, currentEnabled: boolean) => {
     setUpdating(id);
+    setError(""); // Clear any previous errors
+
+    // Optimistically update the UI immediately
+    setCoffeeOptions((prevOptions) =>
+      prevOptions.map((option) =>
+        option.id === id ? { ...option, enabled: !currentEnabled } : option
+      )
+    );
+
     try {
       const response = await fetch("/api/coffee-options", {
         method: "PATCH",
@@ -48,14 +57,24 @@ export default function CoffeeManagementPage() {
         body: JSON.stringify({ id, enabled: !currentEnabled }),
       });
 
-      if (response.ok) {
-        await fetchCoffeeOptions(); // Refresh the list
-      } else {
+      if (!response.ok) {
+        // Revert the optimistic update if the API call failed
+        setCoffeeOptions((prevOptions) =>
+          prevOptions.map((option) =>
+            option.id === id ? { ...option, enabled: currentEnabled } : option
+          )
+        );
         const data = await response.json();
         setError(data.error || "Error al actualizar la opción");
       }
     } catch {
-      setError("Error al actualizar la opción");
+      // Revert the optimistic update if there was a network error
+      setCoffeeOptions((prevOptions) =>
+        prevOptions.map((option) =>
+          option.id === id ? { ...option, enabled: currentEnabled } : option
+        )
+      );
+      setError("Error de red - verifica tu conexión");
     } finally {
       setUpdating(null);
     }
@@ -132,7 +151,9 @@ export default function CoffeeManagementPage() {
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           {coffeeOptions.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-gray-500">No se encontraron opciones de café</p>
+              <p className="text-gray-500">
+                No se encontraron opciones de café
+              </p>
             </div>
           ) : (
             <ul className="divide-y divide-gray-200">
@@ -157,14 +178,18 @@ export default function CoffeeManagementPage() {
                             {option.display_name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {option.uses_milk ? "Con opciones de leche" : "Sin leche"}
+                            {option.uses_milk
+                              ? "Con opciones de leche"
+                              : "Sin leche"}
                           </p>
                         </div>
                       </div>
                     </div>
                     <div className="flex-shrink-0">
                       <button
-                        onClick={() => toggleCoffeeOption(option.id, option.enabled)}
+                        onClick={() =>
+                          toggleCoffeeOption(option.id, option.enabled)
+                        }
                         disabled={updating === option.id}
                         className={`px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
                           option.enabled
@@ -203,19 +228,14 @@ export default function CoffeeManagementPage() {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Información
-              </h3>
+              <h3 className="text-sm font-medium text-blue-800">Información</h3>
               <div className="mt-2 text-sm text-blue-700">
                 <p>
-                  • Las opciones desactivadas no aparecerán en el formulario de registro
+                  • Las opciones desactivadas no aparecerán en el formulario de
+                  registro
                 </p>
-                <p>
-                  • Los cambios se aplican inmediatamente
-                </p>
-                <p>
-                  • Las órdenes existentes no se ven afectadas
-                </p>
+                <p>• Los cambios se aplican inmediatamente</p>
+                <p>• Las órdenes existentes no se ven afectadas</p>
               </div>
             </div>
           </div>
