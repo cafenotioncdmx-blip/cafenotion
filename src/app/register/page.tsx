@@ -58,77 +58,98 @@ export default function RegisterPage() {
   const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
-  // Fetch coffee options on component mount and set up auto-refresh
-  useEffect(() => {
-    const fetchCoffeeOptions = async () => {
-      try {
-        const response = await fetch("/api/coffee-options?enabled_only=true", {
-          cache: "no-store", // Prevent caching to get fresh data
-        });
-        if (response.ok) {
-          const data = await response.json();
-          const newOptions = data.coffee_options;
+  // Fetch coffee options function
+  const fetchCoffeeOptions = async (showNotifications = false) => {
+    try {
+      const response = await fetch("/api/coffee-options?enabled_only=true", {
+        cache: "no-store", // Prevent caching to get fresh data
+      });
+      if (response.ok) {
+        const data = await response.json();
+        const newOptions = data.coffee_options;
 
-          // Check for changes if this is a refresh (not initial load)
-          if (false && coffeeOptions.length > 0) {
-            const currentEnabledNames = coffeeOptions.map(
-              (opt: CoffeeOption) => opt.name
-            );
-            const newEnabledNames = newOptions.map(
-              (opt: CoffeeOption) => opt.name
-            );
+        // Check for changes if this is a refresh and notifications are enabled
+        if (showNotifications && coffeeOptions.length > 0) {
+          const currentEnabledNames = coffeeOptions.map(
+            (opt: CoffeeOption) => opt.name
+          );
+          const newEnabledNames = newOptions.map(
+            (opt: CoffeeOption) => opt.name
+          );
 
-            // Find newly enabled options
-            const newlyEnabled = newOptions.filter(
-              (opt: CoffeeOption) => !currentEnabledNames.includes(opt.name)
-            );
+          // Find newly enabled options
+          const newlyEnabled = newOptions.filter(
+            (opt: CoffeeOption) => !currentEnabledNames.includes(opt.name)
+          );
 
-            // Find newly disabled options
-            const newlyDisabled = coffeeOptions.filter(
-              (opt: CoffeeOption) => !newEnabledNames.includes(opt.name)
-            );
+          // Find newly disabled options
+          const newlyDisabled = coffeeOptions.filter(
+            (opt: CoffeeOption) => !newEnabledNames.includes(opt.name)
+          );
 
-            // Show notifications for changes
-            if (newlyEnabled.length > 0) {
-              const optionNames = newlyEnabled
-                .map((opt: CoffeeOption) => opt.display_name)
-                .join(", ");
-              setNotification({
-                message: `✅ ${optionNames} ${
-                  newlyEnabled.length === 1 ? "está" : "están"
-                } ahora disponible${newlyEnabled.length === 1 ? "" : "s"}`,
-                type: "success",
-              });
-            }
-
-            if (newlyDisabled.length > 0) {
-              const optionNames = newlyDisabled
-                .map((opt: CoffeeOption) => opt.display_name)
-                .join(", ");
-              setNotification({
-                message: `⚠️ ${optionNames} ${
-                  newlyDisabled.length === 1 ? "ya no está" : "ya no están"
-                } disponible${newlyDisabled.length === 1 ? "" : "s"}`,
-                type: "warning",
-              });
-            }
+          // Show notifications for changes
+          if (newlyEnabled.length > 0) {
+            const optionNames = newlyEnabled
+              .map((opt: CoffeeOption) => opt.display_name)
+              .join(", ");
+            setNotification({
+              message: `✅ ${optionNames} ${
+                newlyEnabled.length === 1 ? "está" : "están"
+              } ahora disponible${newlyEnabled.length === 1 ? "" : "s"}`,
+              type: "success",
+            });
           }
 
-          setCoffeeOptions(newOptions);
-          setError(""); // Clear any previous errors
-        } else {
-          setError("Error al cargar las opciones de café");
+          if (newlyDisabled.length > 0) {
+            const optionNames = newlyDisabled
+              .map((opt: CoffeeOption) => opt.display_name)
+              .join(", ");
+            setNotification({
+              message: `⚠️ ${optionNames} ${
+                newlyDisabled.length === 1 ? "ya no está" : "ya no están"
+              } disponible${newlyDisabled.length === 1 ? "" : "s"}`,
+              type: "warning",
+            });
+          }
         }
-      } catch {
-        setError("Error de red - verifica tu conexión");
-      } finally {
-        setCoffeeLoading(false);
+
+        setCoffeeOptions(newOptions);
+        setError(""); // Clear any previous errors
+      } else {
+        setError("Error al cargar las opciones de café");
+      }
+    } catch {
+      setError("Error de red - verifica tu conexión");
+    } finally {
+      setCoffeeLoading(false);
+    }
+  };
+
+  // Fetch coffee options on component mount
+  useEffect(() => {
+    fetchCoffeeOptions(false);
+  }, []); // Empty dependency array - only run on mount
+
+  // Refresh coffee options when user focuses on the page
+  useEffect(() => {
+    const handleFocus = () => {
+      fetchCoffeeOptions(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchCoffeeOptions(true);
       }
     };
 
-    // Initial fetch only
-    fetchCoffeeOptions();
-  }, []); // Empty dependency array - only run on mount
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [coffeeOptions]); // Include coffeeOptions to access current state for comparison
 
   // Auto-dismiss notifications after 4 seconds
   useEffect(() => {
@@ -285,45 +306,70 @@ export default function RegisterPage() {
               className="w-full object-cover"
             />
           </div>
-          <div className="flex justify-between w-full items-center mb-8">
-            <div className="flex h-24 items-center">
-              <div className="w-28">
-                <Image
-                  src="/images/icon.svg"
-                  alt="Aplicación de Evento de Café"
-                  width={100}
-                  height={100}
-                  className="w-full object-cover"
-                />
+            <div className="flex justify-between w-full items-center mb-8">
+              <div className="flex h-24 items-center">
+                <div className="w-28">
+                  <Image
+                    src="/images/icon.svg"
+                    alt="Aplicación de Evento de Café"
+                    width={100}
+                    height={100}
+                    className="w-full object-cover"
+                  />
+                </div>
+                <div className="w-48">
+                  <Image
+                    src="/images/logo.svg"
+                    alt="Aplicación de Evento de Café"
+                    width={100}
+                    height={100}
+                    className="w-full object-cover"
+                  />
+                </div>
               </div>
-              <div className="w-48">
-                <Image
-                  src="/images/logo.svg"
-                  alt="Aplicación de Evento de Café"
-                  width={100}
-                  height={100}
-                  className="w-full object-cover"
-                />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => fetchCoffeeOptions(true)}
+                  className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+                  title="Actualizar opciones de café"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                    <path d="M21 3v5h-5" />
+                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                    <path d="M8 16H3v5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <circle cx="12" cy="5" r="2" />
+                    <circle cx="12" cy="12" r="2" />
+                    <circle cx="12" cy="19" r="2" />
+                  </svg>
+                </button>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowMenu(!showMenu)}
-              className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-              >
-                <circle cx="12" cy="5" r="2" />
-                <circle cx="12" cy="12" r="2" />
-                <circle cx="12" cy="19" r="2" />
-              </svg>
-            </button>
-          </div>
           <div className="mb-6 flex justify-center w-full mx-auto">
             <div className="flex items-center justify-center h-16! w-16! rounded-full bg-green-100">
               <svg
