@@ -78,6 +78,7 @@ const initialCoffeeOptions = [
 ];
 
 // Mutable state for runtime modifications
+// eslint-disable-next-line prefer-const
 let coffeeOptionsState = [...initialCoffeeOptions];
 
 // GET /api/coffee-options - Get all coffee options (public for register page)
