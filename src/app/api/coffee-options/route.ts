@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseClient } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 
 // Temporary in-memory storage for coffee options (until database table is created)
-let coffeeOptionsState = [
+const initialCoffeeOptions = [
   {
     id: "1",
     name: "Espresso",
@@ -77,6 +76,9 @@ let coffeeOptionsState = [
     sort_order: 9,
   },
 ];
+
+// Mutable state for runtime modifications
+let coffeeOptionsState = [...initialCoffeeOptions];
 
 // GET /api/coffee-options - Get all coffee options (public for register page)
 export async function GET(request: NextRequest) {
