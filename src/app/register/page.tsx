@@ -51,16 +51,71 @@ export default function RegisterPage() {
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
   const [coffeeOptions, setCoffeeOptions] = useState<CoffeeOption[]>([]);
   const [coffeeLoading, setCoffeeLoading] = useState(true);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "info" | "warning";
+  } | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
   const router = useRouter();
 
-  // Fetch coffee options on component mount
+  // Fetch coffee options on component mount and set up auto-refresh
   useEffect(() => {
-    const fetchCoffeeOptions = async () => {
+    const fetchCoffeeOptions = async (isRefresh = false) => {
       try {
-        const response = await fetch("/api/coffee-options?enabled_only=true");
+        const response = await fetch("/api/coffee-options?enabled_only=true", {
+          cache: "no-store", // Prevent caching to get fresh data
+        });
         if (response.ok) {
           const data = await response.json();
-          setCoffeeOptions(data.coffee_options);
+          const newOptions = data.coffee_options;
+
+          // Check for changes if this is a refresh (not initial load)
+          if (isRefresh && coffeeOptions.length > 0) {
+            const currentEnabledNames = coffeeOptions.map(
+              (opt: CoffeeOption) => opt.name
+            );
+            const newEnabledNames = newOptions.map(
+              (opt: CoffeeOption) => opt.name
+            );
+
+            // Find newly enabled options
+            const newlyEnabled = newOptions.filter(
+              (opt: CoffeeOption) => !currentEnabledNames.includes(opt.name)
+            );
+
+            // Find newly disabled options
+            const newlyDisabled = coffeeOptions.filter(
+              (opt: CoffeeOption) => !newEnabledNames.includes(opt.name)
+            );
+
+            // Show notifications for changes
+            if (newlyEnabled.length > 0) {
+              const optionNames = newlyEnabled
+                .map((opt: CoffeeOption) => opt.display_name)
+                .join(", ");
+              setNotification({
+                message: `✅ ${optionNames} ${
+                  newlyEnabled.length === 1 ? "está" : "están"
+                } ahora disponible${newlyEnabled.length === 1 ? "" : "s"}`,
+                type: "success",
+              });
+            }
+
+            if (newlyDisabled.length > 0) {
+              const optionNames = newlyDisabled
+                .map((opt: CoffeeOption) => opt.display_name)
+                .join(", ");
+              setNotification({
+                message: `⚠️ ${optionNames} ${
+                  newlyDisabled.length === 1 ? "ya no está" : "ya no están"
+                } disponible${newlyDisabled.length === 1 ? "" : "s"}`,
+                type: "warning",
+              });
+            }
+          }
+
+          setCoffeeOptions(newOptions);
+          setError(""); // Clear any previous errors
         } else {
           setError("Error al cargar las opciones de café");
         }
@@ -71,8 +126,26 @@ export default function RegisterPage() {
       }
     };
 
-    fetchCoffeeOptions();
-  }, []);
+    // Initial fetch
+    fetchCoffeeOptions(false);
+
+    // Set up auto-refresh every 5 seconds
+    const interval = setInterval(() => fetchCoffeeOptions(true), 5000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, [coffeeOptions]); // Add coffeeOptions as dependency to detect changes
+
+  // Auto-dismiss notifications after 4 seconds
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        setNotification(null);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   // Get current drink info
   const currentDrink = coffeeOptions.find(
@@ -313,21 +386,20 @@ export default function RegisterPage() {
             </div>
             <button
               type="button"
-              onClick={handleLogout}
-              className=" bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+              onClick={() => setShowMenu(!showMenu)}
+              className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
+                width="20"
+                height="20"
                 viewBox="0 0 24 24"
+                fill="currentColor"
               >
-                <g fill="currentColor" fillRule="evenodd" clipRule="evenodd">
-                  <path d="M15.99 7.823a.75.75 0 0 1 1.061.021l3.49 3.637a.75.75 0 0 1 0 1.038l-3.49 3.637a.75.75 0 0 1-1.082-1.039l2.271-2.367h-6.967a.75.75 0 0 1 0-1.5h6.968l-2.272-2.367a.75.75 0 0 1 .022-1.06" />
-                  <path d="M3.25 4A.75.75 0 0 1 4 3.25h9.455a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0V4.75H4.75v14.5h7.954V17a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75H4a.75.75 0 0 1-.75-.75z" />
-                </g>
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="12" cy="19" r="2" />
               </svg>
-              Cerrar sesión
             </button>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Regístrate</h1>
@@ -546,6 +618,20 @@ export default function RegisterPage() {
               </div>
             )}
 
+            {notification && (
+              <div
+                className={`text-sm text-center p-3 rounded-md ${
+                  notification.type === "success"
+                    ? "bg-green-50 text-green-700 border border-green-200"
+                    : notification.type === "warning"
+                    ? "bg-yellow-50 text-yellow-700 border border-yellow-200"
+                    : "bg-blue-50 text-blue-700 border border-blue-200"
+                }`}
+              >
+                {notification.message}
+              </div>
+            )}
+
             <div className="space-y-3">
               <button
                 type="submit"
@@ -558,6 +644,67 @@ export default function RegisterPage() {
           </form>
         </div>
       </div>
+
+      {/* Offcanvas Menu */}
+      {showMenu && (
+        <div className="fixed inset-0 z-50 overflow-hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setShowMenu(false)}
+          />
+
+          {/* Offcanvas */}
+          <div className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+            <div className="flex flex-col h-full">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900">Menú</h2>
+                <button
+                  onClick={() => setShowMenu(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Menu Items */}
+              <div className="flex-1 p-6">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                  >
+                    <g fillRule="evenodd" clipRule="evenodd">
+                      <path d="M15.99 7.823a.75.75 0 0 1 1.061.021l3.49 3.637a.75.75 0 0 1 0 1.038l-3.49 3.637a.75.75 0 0 1-1.082-1.039l2.271-2.367h-6.967a.75.75 0 0 1 0-1.5h6.968l-2.272-2.367a.75.75 0 0 1 .022-1.06" />
+                      <path d="M3.25 4A.75.75 0 0 1 4 3.25h9.455a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0V4.75H4.75v14.5h7.954V17a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75H4a.75.75 0 0 1-.75-.75z" />
+                    </g>
+                  </svg>
+                  Cerrar sesión
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
