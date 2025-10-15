@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -14,6 +14,15 @@ interface OrderForm {
   phone: string;
   drink: string;
   milk_type: string;
+}
+
+interface CoffeeOption {
+  id: string;
+  name: string;
+  display_name: string;
+  uses_milk: boolean;
+  enabled: boolean;
+  sort_order: number;
 }
 
 interface SuccessData {
@@ -40,7 +49,36 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [successData, setSuccessData] = useState<SuccessData | null>(null);
+  const [coffeeOptions, setCoffeeOptions] = useState<CoffeeOption[]>([]);
+  const [coffeeLoading, setCoffeeLoading] = useState(true);
   const router = useRouter();
+
+  // Fetch coffee options on component mount
+  useEffect(() => {
+    const fetchCoffeeOptions = async () => {
+      try {
+        const response = await fetch("/api/coffee-options?enabled_only=true");
+        if (response.ok) {
+          const data = await response.json();
+          setCoffeeOptions(data.coffee_options);
+        } else {
+          setError("Error al cargar las opciones de café");
+        }
+      } catch {
+        setError("Error de red - verifica tu conexión");
+      } finally {
+        setCoffeeLoading(false);
+      }
+    };
+
+    fetchCoffeeOptions();
+  }, []);
+
+  // Get current drink info
+  const currentDrink = coffeeOptions.find(
+    (option) => option.name === formData.drink
+  );
+  const currentDrinkUsesMilk = Boolean(currentDrink?.uses_milk);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -48,10 +86,30 @@ export default function RegisterPage() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    // If changing drink, check if new drink uses milk
+    if (name === "drink") {
+      const selectedDrink = coffeeOptions.find(
+        (option) => option.name === value
+      );
+      if (selectedDrink && !selectedDrink.uses_milk) {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+          milk_type: "", // Clear milk type for drinks without milk
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -264,7 +322,7 @@ export default function RegisterPage() {
                 height="24"
                 viewBox="0 0 24 24"
               >
-                <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+                <g fill="currentColor" fillRule="evenodd" clipRule="evenodd">
                   <path d="M15.99 7.823a.75.75 0 0 1 1.061.021l3.49 3.637a.75.75 0 0 1 0 1.038l-3.49 3.637a.75.75 0 0 1-1.082-1.039l2.271-2.367h-6.967a.75.75 0 0 1 0-1.5h6.968l-2.272-2.367a.75.75 0 0 1 .022-1.06" />
                   <path d="M3.25 4A.75.75 0 0 1 4 3.25h9.455a.75.75 0 0 1 .75.75v3a.75.75 0 1 1-1.5 0V4.75H4.75v14.5h7.954V17a.75.75 0 0 1 1.5 0v3a.75.75 0 0 1-.75.75H4a.75.75 0 0 1-.75-.75z" />
                 </g>
@@ -425,51 +483,54 @@ export default function RegisterPage() {
                 id="drink"
                 name="drink"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                disabled={coffeeLoading}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black disabled:opacity-50"
                 value={formData.drink}
                 onChange={handleInputChange}
               >
-                <option value="">Selecciona una bebida</option>
-                <option value="Espresso">1 – Espresso</option>
-                <option value="Americano">2 – Americano</option>
-                <option value="Flat White">3 – Flat White</option>
-                <option value="Latte">4 – Latte</option>
-                <option value="Iced Americano">5 – Iced Americano</option>
-                <option value="Iced Latte">6 – Iced Latte</option>
-                <option value="Iced Matcha Latte">7 – Iced Matcha Latte</option>
-                <option value="Iced Horchata Matcha">
-                  8 – Iced Horchata Matcha
+                <option value="">
+                  {coffeeLoading
+                    ? "Cargando opciones..."
+                    : "Selecciona una bebida"}
                 </option>
-                <option value="Iced Horchata Coffee">
-                  9 – Iced Horchata Coffee
-                </option>
+                {coffeeOptions.map((option) => (
+                  <option key={option.id} value={option.name}>
+                    {option.display_name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div>
-              <label
-                htmlFor="milk_type"
-                className="block text-sm font-medium text-gray-700"
-              >
-                ¿Qué tipo de leche? *
-              </label>
-              <select
-                id="milk_type"
-                name="milk_type"
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
-                value={formData.milk_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Selecciona un tipo de leche</option>
-                <option value="Sin leche">Sin leche</option>
-                <option value="Leche entera">Leche entera</option>
-                <option value="Leche deslactosada">Leche deslactosada</option>
-                <option value="Leche de avena Oatly">
-                  Leche de avena Oatly
-                </option>
-              </select>
-            </div>
+            {currentDrinkUsesMilk && (
+              <div>
+                <label
+                  htmlFor="milk_type"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  ¿Qué tipo de leche? *
+                </label>
+                <select
+                  id="milk_type"
+                  name="milk_type"
+                  required
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+                  value={formData.milk_type}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Selecciona un tipo de leche</option>
+                  <option value="Leche deslactosada">Leche deslactosada</option>
+                  <option value="Leche de avena Oatly">
+                    Leche de avena Oatly
+                  </option>
+                  <option value="Leche de almendra Califia">
+                    Leche de almendra Califia
+                  </option>
+                  <option value="Leche de coco Califia">
+                    Leche de coco Califia
+                  </option>
+                </select>
+              </div>
+            )}
 
             <div className="bg-gray-100 border border-gray-300 rounded-md p-4">
               <p className="text-sm text-gray-700">

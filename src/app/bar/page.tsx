@@ -109,7 +109,12 @@ export default function BarPage() {
   };
 
   const generateWhatsAppLink = (order: Order) => {
-    const message = `Hola ${order.first_name} ${order.last_name}! Tu café ${order.drink} - ${order.milk_type} está listo. Código: ${order.pickup_code}. Pásalo a recoger en la barra!`;
+    // Drinks that don't use milk
+    const drinksWithoutMilk = ["Espresso", "Americano", "Iced Americano"];
+    const drinkUsesMilk = !drinksWithoutMilk.includes(order.drink);
+
+    const milkText = drinkUsesMilk ? ` - ${order.milk_type}` : "";
+    const message = `Hola ${order.first_name} ${order.last_name}! Tu café ${order.drink}${milkText} está listo. Código: ${order.pickup_code}. Pásalo a recoger en la barra!`;
     return `https://wa.me/${order.phone}?text=${encodeURIComponent(message)}`;
   };
 
@@ -266,6 +271,12 @@ export default function BarPage() {
             className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
             Actualizar
+          </button>
+          <button
+            onClick={() => router.push("/bar/coffee-management")}
+            className="px-4 py-2 bg-[#0075de] text-white rounded-md hover:bg-[#005bb7] focus:outline-none focus:ring-2 focus:ring-[#0075de]"
+          >
+            Gestionar Café
           </button>
         </div>
 
