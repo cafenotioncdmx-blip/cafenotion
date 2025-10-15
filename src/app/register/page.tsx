@@ -130,24 +130,71 @@ export default function RegisterPage() {
     fetchCoffeeOptions(false);
   }, []); // Empty dependency array - only run on mount
 
-  // Refresh coffee options when user focuses on the page
+  // Smart auto-refresh: only when page is visible and user is active
   useEffect(() => {
+    let refreshInterval: NodeJS.Timeout | null = null;
+    let lastActivity = Date.now();
+    const ACTIVITY_THRESHOLD = 30000; // 30 seconds of inactivity
+    const REFRESH_INTERVAL = 10000; // Check every 10 seconds
+
     const handleFocus = () => {
       fetchCoffeeOptions(true);
+      lastActivity = Date.now();
     };
 
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         fetchCoffeeOptions(true);
+        lastActivity = Date.now();
+        startPolling();
+      } else {
+        stopPolling();
       }
     };
 
-    window.addEventListener('focus', handleFocus);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const handleUserActivity = () => {
+      lastActivity = Date.now();
+    };
+
+    const startPolling = () => {
+      if (refreshInterval) return; // Already polling
+      
+      refreshInterval = setInterval(() => {
+        // Only poll if user has been active recently and page is visible
+        if (!document.hidden && (Date.now() - lastActivity) < ACTIVITY_THRESHOLD) {
+          fetchCoffeeOptions(true);
+        }
+      }, REFRESH_INTERVAL);
+    };
+
+    const stopPolling = () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+    };
+
+    // Start polling immediately if page is visible
+    if (!document.hidden) {
+      startPolling();
+    }
+
+    // Add event listeners
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    
+    // Track user activity (mouse movement, clicks, keyboard)
+    document.addEventListener("mousemove", handleUserActivity);
+    document.addEventListener("click", handleUserActivity);
+    document.addEventListener("keydown", handleUserActivity);
 
     return () => {
-      window.removeEventListener('focus', handleFocus);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      stopPolling();
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("mousemove", handleUserActivity);
+      document.removeEventListener("click", handleUserActivity);
+      document.removeEventListener("keydown", handleUserActivity);
     };
   }, [coffeeOptions]); // Include coffeeOptions to access current state for comparison
 
@@ -306,70 +353,70 @@ export default function RegisterPage() {
               className="w-full object-cover"
             />
           </div>
-            <div className="flex justify-between w-full items-center mb-8">
-              <div className="flex h-24 items-center">
-                <div className="w-28">
-                  <Image
-                    src="/images/icon.svg"
-                    alt="Aplicación de Evento de Café"
-                    width={100}
-                    height={100}
-                    className="w-full object-cover"
-                  />
-                </div>
-                <div className="w-48">
-                  <Image
-                    src="/images/logo.svg"
-                    alt="Aplicación de Evento de Café"
-                    width={100}
-                    height={100}
-                    className="w-full object-cover"
-                  />
-                </div>
+          <div className="flex justify-between w-full items-center mb-8">
+            <div className="flex h-24 items-center">
+              <div className="w-28">
+                <Image
+                  src="/images/icon.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => fetchCoffeeOptions(true)}
-                  className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
-                  title="Actualizar opciones de café"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-                    <path d="M21 3v5h-5" />
-                    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-                    <path d="M8 16H3v5" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                  >
-                    <circle cx="12" cy="5" r="2" />
-                    <circle cx="12" cy="12" r="2" />
-                    <circle cx="12" cy="19" r="2" />
-                  </svg>
-                </button>
+              <div className="w-48">
+                <Image
+                  src="/images/logo.svg"
+                  alt="Aplicación de Evento de Café"
+                  width={100}
+                  height={100}
+                  className="w-full object-cover"
+                />
               </div>
             </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => fetchCoffeeOptions(true)}
+                className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-gray-300 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+                title="Actualizar opciones de café"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                  <path d="M8 16H3v5" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMenu(!showMenu)}
+                className="bg-gray-100 text-gray-700 py-2 px-3 rounded-md border border-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 h-fit text-sm flex items-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <circle cx="12" cy="5" r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="12" cy="19" r="2" />
+                </svg>
+              </button>
+            </div>
+          </div>
           <div className="mb-6 flex justify-center w-full mx-auto">
             <div className="flex items-center justify-center h-16! w-16! rounded-full bg-green-100">
               <svg
