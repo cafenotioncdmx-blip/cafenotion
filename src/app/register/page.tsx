@@ -158,10 +158,13 @@ export default function RegisterPage() {
 
     const startPolling = () => {
       if (refreshInterval) return; // Already polling
-      
+
       refreshInterval = setInterval(() => {
         // Only poll if user has been active recently and page is visible
-        if (!document.hidden && (Date.now() - lastActivity) < ACTIVITY_THRESHOLD) {
+        if (
+          !document.hidden &&
+          Date.now() - lastActivity < ACTIVITY_THRESHOLD
+        ) {
           fetchCoffeeOptions(true);
         }
       }, REFRESH_INTERVAL);
@@ -182,7 +185,7 @@ export default function RegisterPage() {
     // Add event listeners
     window.addEventListener("focus", handleFocus);
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    
+
     // Track user activity (mouse movement, clicks, keyboard)
     document.addEventListener("mousemove", handleUserActivity);
     document.addEventListener("click", handleUserActivity);
@@ -198,12 +201,12 @@ export default function RegisterPage() {
     };
   }, [coffeeOptions]); // Include coffeeOptions to access current state for comparison
 
-  // Auto-dismiss notifications after 4 seconds
+  // Auto-dismiss notifications after 8 seconds
   useEffect(() => {
     if (notification) {
       const timer = setTimeout(() => {
         setNotification(null);
-      }, 4000);
+      }, 8000);
 
       return () => clearTimeout(timer);
     }
@@ -301,7 +304,19 @@ export default function RegisterPage() {
         });
       } else {
         const data = await response.json();
-        setError(data.error || "Failed to create order");
+        console.log("Order creation failed:", data);
+
+        // Handle specific error cases
+        if (data.code === "DRINK_UNAVAILABLE") {
+          setError(data.error);
+          // Clear the drink selection and refresh coffee options
+          setFormData((prev) => ({ ...prev, drink: "", milk_type: "" }));
+          fetchCoffeeOptions(false); // Refresh without notifications
+        } else {
+          setError(
+            data.error || "Error al crear la orden. Inténtalo de nuevo."
+          );
+        }
       }
     } catch {
       setError("Something went wrong. Please try again.");

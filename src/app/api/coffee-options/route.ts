@@ -81,6 +81,9 @@ const initialCoffeeOptions = [
 // eslint-disable-next-line prefer-const
 let coffeeOptionsState = [...initialCoffeeOptions];
 
+// Export the state for use in other API routes
+export { coffeeOptionsState };
+
 // GET /api/coffee-options - Get all coffee options (public for register page)
 export async function GET(request: NextRequest) {
   try {

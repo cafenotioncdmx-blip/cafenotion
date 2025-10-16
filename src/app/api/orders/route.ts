@@ -47,6 +47,38 @@ export async function POST(request: NextRequest) {
       milk_type,
     });
 
+    // Validate that the selected drink is still available
+    console.log("Checking if drink is still available:", drink);
+    try {
+      // Import the coffee options data directly instead of making HTTP request
+      const { coffeeOptionsState } = await import(
+        "@/app/api/coffee-options/route"
+      );
+
+      // Get enabled coffee options
+      const availableDrinks = coffeeOptionsState
+        .filter((option: any) => option.enabled)
+        .map((option: any) => option.name);
+
+      console.log("Available drinks:", availableDrinks);
+
+      if (!availableDrinks.includes(drink)) {
+        console.log("ERROR: Drink no longer available:", drink);
+        return NextResponse.json(
+          {
+            error: `La opción "${drink}" ya no está disponible. Por favor, selecciona otra opción de café.`,
+            code: "DRINK_UNAVAILABLE",
+            availableOptions: availableDrinks,
+          },
+          { status: 400 }
+        );
+      }
+      console.log("Drink validation passed:", drink);
+    } catch (error) {
+      console.log("Warning: Error accessing coffee options:", error);
+      // If we can't validate, continue with the order (fail open)
+    }
+
     // Validate that the selected drink is still available and correct milk type
     let correctedMilkType = milk_type;
 
