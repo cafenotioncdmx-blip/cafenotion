@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
       milk_type,
     });
 
-    // Validate that the selected drink is still available
+    // Validate that the selected drink is still available (Vercel rebuild)
     console.log("Checking if drink is still available:", drink);
     try {
       // Import the coffee options data directly instead of making HTTP request
