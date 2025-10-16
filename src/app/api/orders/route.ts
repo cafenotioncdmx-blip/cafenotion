@@ -51,14 +51,12 @@ export async function POST(request: NextRequest) {
     console.log("Checking if drink is still available:", drink);
     try {
       // Import the coffee options data directly instead of making HTTP request
-      const { coffeeOptionsState } = await import(
-        "@/app/api/coffee-options/route"
-      );
+      const { getEnabledCoffeeOptions } = await import("@/lib/coffee-options");
 
       // Get enabled coffee options
-      const availableDrinks = coffeeOptionsState
-        .filter((option) => option.enabled)
-        .map((option) => option.name);
+      const availableDrinks = getEnabledCoffeeOptions().map(
+        (option) => option.name
+      );
 
       console.log("Available drinks:", availableDrinks);
 
