@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
 
       // Get enabled coffee options
       const availableDrinks = coffeeOptionsState
-        .filter((option: any) => option.enabled)
-        .map((option: any) => option.name);
+        .filter((option) => option.enabled)
+        .map((option) => option.name);
 
       console.log("Available drinks:", availableDrinks);
 
@@ -83,7 +83,6 @@ export async function POST(request: NextRequest) {
     let correctedMilkType = milk_type;
 
     // Define drinks and their milk requirements (simplified approach)
-    const drinksWithoutMilk = ["Espresso", "Americano", "Iced Americano"];
     const drinksWithMilk = [
       "Flat White",
       "Latte",

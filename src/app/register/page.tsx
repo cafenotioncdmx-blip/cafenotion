@@ -128,6 +128,7 @@ export default function RegisterPage() {
   // Fetch coffee options on component mount
   useEffect(() => {
     fetchCoffeeOptions(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array - only run on mount
 
   // Smart auto-refresh: only when page is visible and user is active
@@ -199,6 +200,7 @@ export default function RegisterPage() {
       document.removeEventListener("click", handleUserActivity);
       document.removeEventListener("keydown", handleUserActivity);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coffeeOptions]); // Include coffeeOptions to access current state for comparison
 
   // Auto-dismiss notifications after 8 seconds
