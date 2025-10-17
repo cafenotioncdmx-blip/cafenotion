@@ -800,12 +800,6 @@ export default function RegisterPage() {
                   <option value="Leche de avena Oatly">
                     Leche de avena Oatly
                   </option>
-                  <option value="Leche de almendra Califia">
-                    Leche de almendra Califia
-                  </option>
-                  <option value="Leche de coco Califia">
-                    Leche de coco Califia
-                  </option>
                 </select>
               </div>
             )}
