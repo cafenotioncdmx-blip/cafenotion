@@ -55,9 +55,6 @@ BAR_PASSCODE=bar123
 
 # Cookie Secret (generate with: openssl rand -base64 32)
 COOKIE_SECRET=your_cookie_secret_here
-
-# Default Country Code for Phone Numbers
-DEFAULT_COUNTRY_CODE=52
 ```
 
 ### 2. Database Setup
@@ -148,7 +145,7 @@ create table orders (
 - **Service Key Only**: Client never has direct database access
 - **JWT Tokens**: Secure, HTTP-only cookies for authentication
 - **Input Validation**: Server-side validation for all inputs
-- **Phone Normalization**: Automatic E.164 format conversion
+- **International Phone Support**: Country selector with automatic E.164 format validation
 
 ## WhatsApp Integration
 
@@ -176,7 +173,6 @@ Make sure to set all required environment variables in your deployment platform:
 - `REGISTER_PASSCODE`
 - `BAR_PASSCODE`
 - `COOKIE_SECRET`
-- `DEFAULT_COUNTRY_CODE`
 
 ## Development
 
@@ -207,4 +203,5 @@ src/
 ## License
 
 MIT License - feel free to use for your events!
+
 # Updated Wed Oct 15 13:16:37 CST 2025

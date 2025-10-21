@@ -41,30 +41,22 @@ export async function getCurrentUser(): Promise<User | null> {
   return await verifyToken(token);
 }
 
-export function normalizePhoneNumber(
-  phone: string,
-  countryCode: string = "52"
-): string {
-  // Remove all non-digit characters
-  const digits = phone.replace(/\D/g, "");
+export function normalizePhoneNumber(phone: string): string {
+  // PhoneInput component always returns numbers in E.164 format (e.g., +13105551234)
+  // This function validates the format is correct
 
-  // If it already starts with country code, return as is
-  if (digits.startsWith(countryCode)) {
-    return `+${digits}`;
+  if (!phone) {
+    throw new Error("Phone number is required");
   }
 
-  // If it's a local number, add country code
-  if (digits.length === 10) {
-    return `+${countryCode}${digits}`;
+  if (phone.startsWith("+")) {
+    return phone;
   }
 
-  // If it's already in E.164 format, return as is
-  if (digits.startsWith("52") && digits.length === 12) {
-    return `+${digits}`;
-  }
-
-  // Default: add country code
-  return `+${countryCode}${digits}`;
+  // If somehow a non-E.164 number comes through, throw an error
+  throw new Error(
+    "Phone number must be in international format (e.g., +1234567890)"
+  );
 }
 
 export function generatePickupCode(): string {

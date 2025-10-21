@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 interface OrderForm {
   first_name: string;
@@ -738,15 +740,19 @@ export default function RegisterPage() {
                 Número whatsapp (lo necesitamos para mensajearte cuando esté
                 listo tu café) *
               </label>
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                required
-                placeholder="e.g., 5551234567"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black"
+              <PhoneInput
+                international
+                defaultCountry="MX"
                 value={formData.phone}
-                onChange={handleInputChange}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, phone: value || "" }))
+                }
+                className="mt-1"
+                numberInputProps={{
+                  className:
+                    "block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-black focus:border-black",
+                  required: true,
+                }}
               />
             </div>
 

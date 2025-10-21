@@ -124,13 +124,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Normalize phone number to E.164 format
-    console.log("About to normalize phone number");
-    const normalizedPhone = normalizePhoneNumber(
-      phone,
-      process.env.DEFAULT_COUNTRY_CODE
-    );
-    console.log("Phone normalized:", normalizedPhone);
+    // Validate phone number is in E.164 format (PhoneInput component provides this)
+    console.log("About to validate phone number");
+    const normalizedPhone = normalizePhoneNumber(phone);
+    console.log("Phone validated:", normalizedPhone);
 
     // Generate unique pickup code
     console.log("About to generate pickup code");
